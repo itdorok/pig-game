@@ -22,26 +22,10 @@ const currentScore1 = document.querySelector("#current--1");
 const dice = document.querySelector(".dice");
 
 //---------------------------------------------
-
-// Roll the dice
-// starting always from player 1
-//1. get random number for dice
-//2. the number should be added to current number
-//3. if dice number is 1 than player--active is hidden
-
 // check out current player
-// condition 1. contains player--active class
-// condition 2. diceNumber is not 1
-let currentPlayer;
-
-const playerActive = function () {
-  for (let i = 0; i < players.length; i++) {
-    const cList = players[i].classList;
-    if (cList.contains("player--0") && cList.contains("player--active")) {
-      currentPlayer = "player--0";
-    }
-  }
-};
+const currentPlayer = player0.classList.contains("player--active")
+  ? "player--0"
+  : "player--1";
 
 //roll the dice, change the image, add the result
 let diceNumber;
@@ -50,7 +34,6 @@ rollDice.addEventListener("click", function () {
   diceNumber = Math.trunc(Math.random() * 6 + 1);
   dice.src = `dice-${diceNumber}.png`;
 
-  playerActive();
   score = document.querySelector(`.${currentPlayer} .current-score`);
   addToCntScore();
 });
