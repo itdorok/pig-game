@@ -8,6 +8,9 @@ const players = document.querySelectorAll(".player");
 const player0 = document.querySelector(".player--0");
 const player1 = document.querySelector(".player--1");
 
+//score
+const totalScores = document.querySelectorAll(".score");
+
 //btn clicked
 const newGame = document.querySelector(".btn--new");
 const rollDice = document.querySelector(".btn--roll");
@@ -22,69 +25,101 @@ const currentScore1 = document.querySelector("#current--1");
 const dice = document.querySelector(".dice");
 
 //---------------------------------------------
-// check out current player
-const currentPlayer = player0.classList.contains("player--active")
-  ? "player--0"
-  : "player--1";
 
-//roll the dice, change the image, add the result
+// check out current player
+let currentScore;
+let totalScore;
+let currentPlayer;
+let currentPlayerNot;
+
+const current = function () {
+  if (player0.classList.contains("player--active")) {
+    currentScore = document.querySelector("#current--0");
+    totalScore = document.querySelector("#score--0");
+    currentPlayer = player0;
+    currentPlayerNot = player1;
+  } else {
+    currentScore = document.querySelector("#current--1");
+    totalScore = document.querySelector("#score--1");
+    currentPlayer = player1;
+    currentPlayerNot = player0;
+  }
+};
+
+// get random number, change dice img
 let diceNumber;
-let score;
-rollDice.addEventListener("click", function () {
+const randomDice = function () {
+  dice.classList.remove("hidden");
   diceNumber = Math.trunc(Math.random() * 6 + 1);
   dice.src = `dice-${diceNumber}.png`;
+};
 
-  score = document.querySelector(`.${currentPlayer} .current-score`);
-  addToCntScore();
-});
-
-//add the result of the dice to current player's score
+//add to current score
 const addToCntScore = function () {
   if (diceNumber !== 1) {
-    score.textContent = Number(score.textContent) + diceNumber;
+    currentScore.textContent =
+      Number(currentScore.textContent) + Number(diceNumber);
   } else {
-    switchPlayer();
+    switchPlayer(currentPlayer);
   }
 };
-
-//switch the player: currentscore =0, background color change
-const switchPlayer = function () {
-  if (currentPlayer === "player--0") {
-    player0.classList.remove("player--active");
-    player1.classList.add("player--active");
-    currentScore0.textContent = "0";
-    currentPlayer = "player--1";
-  } else {
-    player1.classList.remove("player--active");
-    player0.classList.add("player--active");
-    currentScore1.textContent = "0";
-    currentPlayer = "player--0";
-  }
-};
-
-// hold btn click, store current score to total score, switch active player
-
-let totalScore;
-hold.addEventListener("click", function () {
-  //1. current score will be added to total score
-  //2. switch the active player
+//add to total score
+const addToTotalScore = function () {
   if (currentPlayer === undefined) {
     alert("Roll the dice first!");
-  } else {
-    totalScore = document.querySelector(`.${currentPlayer} .score`);
+  } else if (Number(totalScore.textContent) < 10) {
     totalScore.textContent =
-      Number(totalScore.textContent) + Number(score.textContent);
+      Number(totalScore.textContent) + Number(currentScore.textContent);
+    if (totalScore.textContent >= 10) {
+      endTheGame();
+    }
+  }
+};
+
+//switch the player
+const switchPlayer = function (currentPlayer) {
+  currentScore.textContent = "0";
+  currentPlayer.classList.remove("player--active");
+  currentPlayerNot.classList.add("player--active");
+  currentPlayer = currentPlayerNot;
+};
+
+// new game btn 이외에 모든 eventListner 정지
+const endTheGame = function () {
+  currentPlayer.classList.add("player--winner");
+};
+
+//roll dice btn
+rollDice.addEventListener("click", function () {
+  if (
+    // 아직 주사위를 굴리지 않아서 currentScore가 저장되지 않았을때
+    typeof totalScore === "undefined" ||
+    Number(totalScore.textContent) < 10
+  ) {
+    randomDice();
+    current();
+    addToCntScore();
   }
 });
 
-// whole game reset
+//hold btn
+hold.addEventListener("click", function () {
+  addToTotalScore();
+  switchPlayer(currentPlayer);
+});
+
+// new game btn
 newGame.addEventListener("click", function () {
+  //점수 모두 0으로
   for (let i = 0; i < players.length; i++) {
-    scores[i].textContent = "0";
+    totalScores[i].textContent = "0";
     currentScores[i].textContent = "0";
   }
+  //player--winner delete
+  currentPlayer.classList.remove("player--winner");
+
+  //시작은 늘 player--0부터
   if (!player0.classList.contains("player--active")) {
-    player0.classList.add("player--active");
-    player1.classList.remove("player--active");
+    switchPlayer(player1);
   }
 });
